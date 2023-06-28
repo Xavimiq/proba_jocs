@@ -9,6 +9,7 @@
 #include "ai_behavior.h"
 #include "shader.h"
 #include "game.h"
+#include "anim_states.h"
 
 class Game;
 //class AIBehavior;
@@ -126,6 +127,7 @@ class EntityEnemy : public EntityMesh {
 
 public:
 	AIBehavior behavior_c;
+	AnimState anim_state;
 	//EntityEnemy() {};
 	EntityEnemy(std::string name, Vector3 pos, Mesh* mesh, Shader* shader, Texture* texture, std::vector<Vector3> waypoints, EntityPlayer* player) :
 		EntityMesh(nullptr, name, mesh, texture, shader, pos) 
@@ -133,8 +135,14 @@ public:
 		this->behavior_c.setModel(&model);
 		this->behavior_c.waypoints = waypoints;
 		this->behavior_c.my_player = player;
+
+		anim_state.addAnimationState("data/Animations/idle.skanim", eEnemyStates::ENEMY_IDLE);
+		anim_state.addAnimationState("data/Animations/walk.skanim", eEnemyStates::ENEMY_WALK);
+
+		anim_state.goToState(eEnemyStates::ENEMY_WALK);
 	}
 
+	void render() override;
 	void update(float elapsed_time);
 };
 
@@ -202,15 +210,28 @@ public:
 
 
 
-class EntityBottonDoor : public EntityMesh{
+class EntityButtonDoor : public Entity {
 
 public:
-	EntityDoor* Door1;
 
-	EntityBottonDoor(Vector3 BottonPosition, Vector3 DoorPosition, float time_to_close);
+	EntityDoor* Door;
+	float DoorTime;
+	EntityPlayer* player;
 
-	void OpenDoor(EntityPlayer* player, float dt);
+	Vector3 ButtonPosition;
+	bool isPressed = false;
+	float time_to_go;
+	std::vector<Vector3> area;
 
+	EntityMesh* ButtonPressed;
+	EntityMesh* ButtonNotPressed;
+
+
+	EntityButtonDoor(Vector3 ButtonPosition, Vector3 DoorPosition, float time_to_close, EntityPlayer* player, std::vector<Vector3> area);
+
+	void render();
+	void clickBotton();
+	void OpenDoor(float dt);
 };
 
 #endif

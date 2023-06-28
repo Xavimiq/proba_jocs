@@ -14,6 +14,7 @@ void AIBehavior::update(float seconds_elapsed)
 	if (state == SEARCH)
 	{
 		searchTarget(seconds_elapsed);
+		anim_state.goToState(eEnemyStates::ENEMY_WALK, 0.4f);
 
 		if (canSeeTarget()) {
 			std::cout << "target spotted!" << std::endl;
@@ -27,6 +28,7 @@ void AIBehavior::update(float seconds_elapsed)
 		Vector3 target = my_player->model.getTranslation();
 
 		lookAtTarget(target, seconds_elapsed);
+		anim_state.goToState(eEnemyStates::ENEMY_IDLE, 0.4f);
 
 		if (!canSeeTarget()) {
 			std::cout << "target missed!" << std::endl;
@@ -46,7 +48,7 @@ bool AIBehavior::canSeeTarget()
 	//World* world = World::get_instance();
 	Matrix44 target = my_player->model;
 	
-	Vector3 enemyFront = model->frontVector(); 
+	Vector3 enemyFront = model->frontVector().normalize(); 
 
 	
 
@@ -57,23 +59,41 @@ bool AIBehavior::canSeeTarget()
 	Vector3 ray_origin = model->getTranslation();
 	Vector3 ray_direction = toTarget;
 
+
 	if (toTarget.dot(enemyFront) > 0.5)
 	{
 		for (auto e : World::get_instance()->root.children)
 		{
-			EntityMesh* em = dynamic_cast<EntityMesh*>(e);
-			//if (!ec) continue;
-			if (em->isCollider = true)
-			{
-				if (em->mesh->testRayCollision(
-					em->model,
-					ray_origin,
-					ray_direction,
-					Vector3(),
-					Vector3(),
-					distance
-				)) {
-					return false; //NO COLISIONA
+			
+			if (EntityMesh* em = dynamic_cast<EntityMesh*>(e)) {
+				//if (!ec) continue;
+				if (em->isCollider = true)
+				{
+					if (em->mesh->testRayCollision(
+						em->model,
+						ray_origin,
+						ray_direction,
+						Vector3(),
+						Vector3(),
+						distance
+					)) {
+						return false; //NO COLISIONA
+					}
+				}
+			}
+			else if (EntityButtonDoor* em = dynamic_cast<EntityButtonDoor*>(e)) {
+				if (em->Door->isCollider = true)
+				{
+					if (em->Door->mesh->testRayCollision(
+						em->Door->model,
+						ray_origin,
+						ray_direction,
+						Vector3(),
+						Vector3(),
+						distance
+					)) {
+						return false; //NO COLISIONA
+					}
 				}
 			}
 
@@ -95,7 +115,7 @@ void AIBehavior::searchTarget(float seconds_elapsed) {
 		float toTargetLength = (target - origin).length();
 
 		lookAtTarget(target, seconds_elapsed);
-		model->translate(0.f, 0.f, seconds_elapsed * 14.f);
+		model->translate(0.f, 0.f, seconds_elapsed * 124.f);
 
 		if (toTargetLength < 10.f)
 		{

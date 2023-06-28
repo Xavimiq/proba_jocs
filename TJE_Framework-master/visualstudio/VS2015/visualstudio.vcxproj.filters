@@ -75,7 +75,7 @@
     <ClCompile Include="..\..\src\extra\PathFinder\AStar.cpp">
       <Filter>extra\PathFinder</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Audio.cpp" />
+    <ClCompile Include="..\..\src\anim_states.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\camera.h" />
@@ -154,10 +154,7 @@
       <Filter>extra\PathFinder</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\ai_behavior.h" />
-    <ClInclude Include="..\..\src\extra\bass.h">
-      <Filter>extra</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Audio.h" />
+    <ClInclude Include="..\..\src\anim_states.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="extra">

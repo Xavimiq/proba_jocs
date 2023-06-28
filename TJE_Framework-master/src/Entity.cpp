@@ -6,7 +6,6 @@
 #include "framework.h"
 #include "input.h"
 #include "World.h"
-#include "Audio.h"
 
 Entity::Entity()
 {
@@ -337,45 +336,57 @@ bool EntityPlayer::checkPlayerCollision(Vector3& target_position, std::vector<sC
 	return !collisions.empty();
 }
 
-//bool EntityPlayer::checkLineOfSight(Matrix44& obs, Matrix44& target)
-//{
-//	Vector3 front = normalize(obs.frontVector());
-//	Vector3 toTarget = target.getTranslation() - obs.getTranslation();
-//
-//	float distance = toTarget.length();
-//	toTarget = toTarget.normalize();
-//
-//	Vector3 ray_origin = obs.getTranslation();
-//	Vector3 ray_direction = toTarget;
-//
-//	if (toTarget.dot(front) > 0.5)
-//	{
-//		for (auto e : World::get_instance()->root.children)
-//		{
-//			EntityCollider* ec = dynamic_cast<EntityCollider*>(e);
-//			if (!ec) continue;
-//
-//			if (ec->mesh->testRayCollision(
-//				ec->model,
-//				ray_origin,
-//				ray_direction,
-//				Vector3(),
-//				Vector3(),
-//				distance
-//			)) {
-//				return false; //NO COLISIONA
-//			}
-//
-//		}
-//		return true;
-//	}
-//	return false;
-//}
+void EntityEnemy::render()
+{
+	if (!mesh) return;
+	Camera* camera = Camera::current;
+	Matrix44 globalmatrix = this->getGlobalMatrix();
+
+	Vector3 sphere_center = globalmatrix * mesh->box.center;
+
+	float sphere_radius = mesh->radius;
+
+	if (cull && (camera->testSphereInFrustum(sphere_center, sphere_radius) == false ||
+		camera->eye.distance(globalmatrix.getTranslation()) > 500)) {
+		Entity::render();
+		return;
+	}
+
+	camera->enable();
+
+	shader->enable();
+
+	//upload uniforms
+	shader->setUniform("u_color", Vector4(1, 1, 1, 1));
+	shader->setUniform("u_viewprojection", camera->viewprojection_matrix);
+	shader->setUniform("u_texture", texture, 0);
+	shader->setUniform("u_model", globalmatrix);
+	shader->setUniform("u_time", time);
+	shader->setUniform("u_tiling", tiling);
+
+	shader->setUniform("u_camera_pos", camera->eye);
+	shader->setUniform("u_light_pos", Vector3(400, 0, 0));
+
+
+
+	shader->setUniform("u_Ka", Vector3(1.f));
+	shader->setUniform("u_Kd", Vector3(1.f));
+	shader->setUniform("u_Ks", Vector3(1.f));
+
+
+	mesh->renderAnimated(GL_TRIANGLES, &anim_state.getCurrentSkeleton());
+
+	//disable shader
+	shader->disable();
+
+	Entity::render();
+}
 
 
 void EntityEnemy::update(float elapsed_time)
 {
 	behavior_c.update(elapsed_time);
+	anim_state.update(elapsed_time);
 }
 
 EntityGUIelement::EntityGUIelement(Vector2 pos, Vector2 size, Texture* texture, eButtonId button_id, const std::string name)
@@ -490,20 +501,75 @@ EntityKey::EntityKey(Vector3 pos, EntityMesh* _Door) :
 
 void EntityKey::collectKey(EntityPlayer* player)
 {
-	if ((player->model.getTranslation() - this->model.getTranslation()).length() < 50.f && Input::isKeyPressed(SDL_SCANCODE_T)) {
+	if ((player->model.getTranslation() - this->model.getTranslation()).length() < 50.f && Input::wasKeyPressed(SDL_SCANCODE_T)) {
 		this->model.setTranslation(0.f, -60.f, 0.f);
 		isCollected = true;
 		std::cout << "llave seleccionada" << std::endl;
 		Door->model.rotate(90 * DEG2RAD, Vector3(0, 1, 0));
 		Door->model.translate(17, 0, 17);
-		Audio::Init();
-		Audio::Play("data/audio/hitmarker_2.wav", 1.f, false);
 	}
 	if (isCollected)
-	{
-		
+	{	
 		GUIelements.render();
-		
 	}
 
+}
+
+EntityButtonDoor::EntityButtonDoor(Vector3 ButtonPosition, Vector3 DoorPosition, float time_to_close, EntityPlayer* player, std::vector<Vector3> area) : Entity(DoorPosition, NULL)
+{
+	//if (sizeof(area) != 2) return;
+	this->Door = new EntityDoor(DoorPosition);
+	this->DoorTime = time_to_close;
+	this->player = player;
+	this->ButtonPosition = ButtonPosition;
+	this->area = area;
+
+	this->ButtonNotPressed = new EntityMesh(nullptr, "ent_bot", Mesh::Get("data/PlayStage/BottonNormal.obj"), Texture::Get("data/texture.tga"), Shader::Get("data/shaders/basic.vs", "data/shaders/basic_color_mat.fs"), ButtonPosition);
+	this->ButtonPressed = new EntityMesh(nullptr, "ent_bot", Mesh::Get("data/PlayStage/BottonPush.obj"), Texture::Get("data/texture.tga"), Shader::Get("data/shaders/basic.vs", "data/shaders/basic_color_mat.fs"), ButtonPosition);
+
+}
+
+void EntityButtonDoor::render() {
+	Door->render();
+	if (isPressed) {
+		this->ButtonPressed->render();
+	}
+	else {
+		this->ButtonNotPressed->render();
+	}
+}
+
+void EntityButtonDoor::clickBotton() {
+	if (isPressed)	return;
+	if ((this->player->model.getTranslation() - this->ButtonPosition).length() < 50.f && Input::wasKeyPressed(SDL_SCANCODE_T)) {
+		isPressed = true;
+		time_to_go = DoorTime;
+
+		this->Door->model.rotate(90 * DEG2RAD, Vector3(0, 1, 0));
+		Door->model.translate(17, 0, 17);
+	}
+
+}
+
+void EntityButtonDoor::OpenDoor(float dt) {
+	const Vector3& punto1 = area[0];
+	const Vector3& punto2 = area[1];
+
+
+	if (isPressed) {
+		time_to_go -= dt;
+
+		if (time_to_go <= 0.0f) {
+			isPressed = false;
+			this->Door->model.translate(-17, 0, -17);
+			this->Door->model.rotate(-90 * DEG2RAD, Vector3(0, 1, 0));
+			if (punto1.x <= this->player->model.getTranslation().x && this->player->model.getTranslation().x <= punto2.x &&
+				punto1.y <= this->player->model.getTranslation().y && this->player->model.getTranslation().y <= punto2.y &&
+				punto1.z <= this->player->model.getTranslation().z && this->player->model.getTranslation().z <= punto2.z) {
+
+				std::cout << "YOU LOST";
+				Game::instance->current_stage = Lost;
+			}
+		}
+	}
 }

@@ -65,7 +65,6 @@
     <LinkIncremental>false</LinkIncremental>
     <LibraryPath>..\libs\lib;$(LibraryPath)</LibraryPath>
     <OutDir>..\..\</OutDir>
-    <TargetName>$(ProjectName)_debug</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -84,7 +83,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;opengl32.lib;glu32.lib;glew32s.lib;bass.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;opengl32.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -129,7 +128,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\ai_behavior.cpp" />
     <ClCompile Include="..\..\src\animation.cpp" />
-    <ClCompile Include="..\..\src\Audio.cpp" />
+    <ClCompile Include="..\..\src\anim_states.cpp" />
     <ClCompile Include="..\..\src\camera.cpp" />
     <ClCompile Include="..\..\src\Entity.cpp" />
     <ClCompile Include="..\..\src\extra\coldet\box.cpp" />
@@ -162,10 +161,9 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\ai_behavior.h" />
     <ClInclude Include="..\..\src\animation.h" />
-    <ClInclude Include="..\..\src\Audio.h" />
+    <ClInclude Include="..\..\src\anim_states.h" />
     <ClInclude Include="..\..\src\camera.h" />
     <ClInclude Include="..\..\src\Entity.h" />
-    <ClInclude Include="..\..\src\extra\bass.h" />
     <ClInclude Include="..\..\src\extra\coldet\box.h" />
     <ClInclude Include="..\..\src\extra\coldet\coldet.h" />
     <ClInclude Include="..\..\src\extra\coldet\coldetimpl.h" />

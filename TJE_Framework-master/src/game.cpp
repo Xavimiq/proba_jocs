@@ -100,6 +100,7 @@ void Game::render(void)
 	if (current_stage == Play) { current = gameplay; this->camera = this->current->my_camera; mouse_locked = true; }
 	if (current_stage == Exit) { must_exit = true; }
 	if (current_stage == Win) { current = win; this->camera = this->current->my_camera; }
+	if (current_stage == Win) { current = menu; this->camera = this->current->my_camera; }
 	//1875, 75
 	
 	/*
