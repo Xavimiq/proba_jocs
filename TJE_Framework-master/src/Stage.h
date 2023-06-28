@@ -57,6 +57,8 @@ public:
 	EntityEnemy* my_enemy_2;
 	
 	EntityPrisoner* prisoner_1;
+	EntityPrisoner* prisoner_2;
+	EntityPrisoner* prisoner_3;
 
 	EntityDoor* Door0;
 	EntityKey* key0;
@@ -64,6 +66,27 @@ public:
 	EntityDoor* Door1;
 	EntityKey* key1;
 
+	EntityDoor* Door2;
+	EntityKey* key2;
+
+	EntityDoor* Door3;
+	EntityKey* key3;
+
+	EntityDoor* Door4;
+	EntityKey* key4;
+
+	EntityDoor* Door5;
+	EntityKey* key5;
+
+	EntityDoor* Door6;
+	EntityKey* key6;
+
+	EntityButtonDoor* ButtonDoor0;
+	EntityButtonDoor* ButtonDoor1;
+	EntityButtonDoor* ButtonDoor2;
+	EntityButtonDoor* ButtonDoor3;
+
+	bool isTalking = false;
 };
 
 class MenuStage : public Stage {

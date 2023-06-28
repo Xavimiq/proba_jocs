@@ -3,7 +3,7 @@
 //#include "Entity.h"
 #include "extra/pathfinder/PathFinder.h"
 #include "extra/pathfinder/Dijkstra.h"
-
+#include "anim_states.h"
 //#include
 
 class EntityPlayer;
@@ -39,6 +39,7 @@ public:
 	//EntityEnemy* enemy;
 	std::vector<Vector3> waypoints;
 	EntityPlayer* my_player;
+	AnimState anim_state;
 
 	void setModel(Matrix44* m) { model = m; };
 	void update(float seconds_elapsed);

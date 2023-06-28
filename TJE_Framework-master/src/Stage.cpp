@@ -1,5 +1,5 @@
 #include "Stage.h"
-#include "Audio.h"
+
 
 class Entity;
 class Shader;
@@ -60,13 +60,13 @@ PlayStage::PlayStage() : Stage()
 
 	Texture* texture_enemy;
 	texture_enemy = new Texture();
-	texture_enemy->load("data/texture.tga");
+	texture_enemy->load("data/Animations/Walking_2/textures/ely-vanguardsoldier-kerwinatienza_diffuse.png");
 
 	Mesh* mesh_enemy;
-	mesh_enemy = Mesh::Get("data/Enemy/enemy.obj");
+	mesh_enemy = Mesh::Get("data/Animations/person.MESH");
 
 	Shader* shader_enemy;
-	shader_enemy = Shader::Get("data/shaders/basic.vs", "data/shaders/basic_color_mat.fs");
+	shader_enemy = Shader::Get("data/shaders/skinning.vs", "data/shaders/texture.fs");
 
 	std::vector<Vector3> waypoints1;
 	waypoints1.push_back(Vector3(220, 0, -210));
@@ -76,6 +76,7 @@ PlayStage::PlayStage() : Stage()
 	my_enemy_1 = new EntityEnemy("ene1", Vector3(220, 0, -210), mesh_enemy, shader_enemy, texture_enemy, waypoints1, my_player);
 	World::get_instance()->root.addChild(my_enemy_1);
 	my_enemy_1->cull = false;
+	my_enemy_1->model.scale(0.25, 0.25, 0.25);
 
 	std::vector<Vector3> waypoints2;
 	waypoints2.push_back(Vector3(-220, 0, -290));
@@ -87,6 +88,7 @@ PlayStage::PlayStage() : Stage()
 	my_enemy_2 = new EntityEnemy("ene2", Vector3(-220, 0, -290), mesh_enemy, shader_enemy, texture_enemy, waypoints2, my_player);
 	World::get_instance()->root.addChild(my_enemy_2);
 	my_enemy_2->cull = false;
+	my_enemy_2->model.scale(0.25, 0.25, 0.25);
 
 	///RENDER PRISIONER
 
@@ -96,11 +98,18 @@ PlayStage::PlayStage() : Stage()
 	Texture* texture_dialogue;
 	texture_dialogue = new Texture();
 	texture_dialogue->load("data/PlayStage/Prisoner/Dialogue1.png");
+	shader_enemy = Shader::Get("data/shaders/basic.vs", "data/shaders/basic_color_mat.fs");
 
 	prisoner_1 = new EntityPrisoner("pris1", Vector3(-210, 0, -95), mesh_prisoner, shader_enemy, texture_dialogue, texture_dialogue);
 	World::get_instance()->root.addChild(prisoner_1);
 	
+	prisoner_2 = new EntityPrisoner("pris2", Vector3(531, 0, -155), mesh_prisoner, shader_enemy, texture_dialogue, texture_dialogue);
+	prisoner_2->model.rotate(180 * DEG2RAD, Vector3(0, 1, 0));
+	World::get_instance()->root.addChild(prisoner_2);
 
+	prisoner_3 = new EntityPrisoner("pris3", Vector3(925, 0, -277), mesh_prisoner, shader_enemy, texture_dialogue, texture_dialogue);
+	World::get_instance()->root.addChild(prisoner_3);
+	
 	///RENDER KEYS
 	Door0 = new EntityDoor(Vector3(240, 0, 147));
 	Door0->model.rotate(90 * DEG2RAD, Vector3(0, 1, 0));
@@ -114,15 +123,78 @@ PlayStage::PlayStage() : Stage()
 	key1 = new EntityKey(Vector3(440, 0, 648), Door1);
 	World::get_instance()->root.addChild(key1);
 
-	// Audio
+	Door2 = new EntityDoor(Vector3(505, 0, 151));
+	Door2->model.rotate(90 * DEG2RAD, Vector3(0, 1, 0));
+	World::get_instance()->root.addChild(Door2);
+	key2 = new EntityKey(Vector3(495, 0, 145), Door2);
+	World::get_instance()->root.addChild(key2);
+
+	//PUERTA CON 3 LLAVES, MODIFICAR
+	Door3 = new EntityDoor(Vector3(950, 0, 48));
+	World::get_instance()->root.addChild(Door3);
+	key3 = new EntityKey(Vector3(940, 0, 48), Door3);
+	World::get_instance()->root.addChild(key3);
+
+	Door4 = new EntityDoor(Vector3(882, 0, 120));
+	Door4->model.rotate(90 * DEG2RAD, Vector3(0, 1, 0));
+	World::get_instance()->root.addChild(Door4);
+	key4 = new EntityKey(Vector3(882, 0, 110), Door4);
+	World::get_instance()->root.addChild(key4);
+
+	Door5 = new EntityDoor(Vector3(901, 0, 588));
+	Door5->model.rotate(90 * DEG2RAD, Vector3(0, 1, 0));
+	World::get_instance()->root.addChild(Door5);
+	key5 = new EntityKey(Vector3(901, 0, 580), Door5);
+	World::get_instance()->root.addChild(key5);
+
+	//TIMER DOOR
+	std::vector<Vector3> area;
+	area.push_back(Vector3());
+	area.push_back(Vector3());
+
+
+	ButtonDoor0 = new EntityButtonDoor(Vector3(301, 20, 435), Vector3(152, 0, 421), 5.0f, my_player, area);
+	World::get_instance()->root.addChild(ButtonDoor0);
+	World::get_instance()->root.addChild(ButtonDoor0->Door);
+
+	std::vector<Vector3> area1;
+	area1.push_back(Vector3(1));
+	area1.push_back(Vector3(1));
+
+	ButtonDoor1 = new EntityButtonDoor(Vector3(300, 20, 231), Vector3(152, 0, 226), 5.0f, my_player, area1);
+	World::get_instance()->root.addChild(ButtonDoor1);
+	World::get_instance()->root.addChild(ButtonDoor1->Door);
 	
+	std::vector<Vector3> area2;
+	area2.push_back(Vector3(2));
+	area2.push_back(Vector3(2));
+	
+	ButtonDoor2 = new EntityButtonDoor(Vector3(-105, 20, -416), Vector3(-58, 0, -418), 5.0f, my_player, area2);
+	ButtonDoor2->ButtonNotPressed->rotate(-90 * DEG2RAD, Vector3(0, 1, 0));
+	ButtonDoor2->ButtonPressed->rotate(-90 * DEG2RAD, Vector3(0, 1, 0));
+	ButtonDoor2->Door->rotate(-90 * DEG2RAD, Vector3(0, 1, 0));
+	World::get_instance()->root.addChild(ButtonDoor2);
+	World::get_instance()->root.addChild(ButtonDoor2->Door);
+
+	std::vector<Vector3> area3;
+	area3.push_back(Vector3(3.f));
+	area3.push_back(Vector3(3.f));
+
+	ButtonDoor3 = new EntityButtonDoor(Vector3(847, 20, 190), Vector3(844, 0, 258), 5.0f, my_player, area3);
+	ButtonDoor3->ButtonNotPressed->rotate(-180 * DEG2RAD, Vector3(0, 1, 0));
+	ButtonDoor3->ButtonPressed->rotate(-180 * DEG2RAD, Vector3(0, 1, 0));
+	ButtonDoor3->Door->rotate(-180 * DEG2RAD, Vector3(0, 1, 0));
+	World::get_instance()->root.addChild(ButtonDoor3);
+	World::get_instance()->root.addChild(ButtonDoor3->Door);
+
 
 
 }
 
 void PlayStage::render()
 {
-	
+
+
 	//set the clear color (the background color)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -133,6 +205,7 @@ void PlayStage::render()
 	
 	my_camera->enable();
 
+	
 
 	//set flags
 	glDisable(GL_BLEND);
@@ -146,15 +219,12 @@ void PlayStage::render()
 	my_player->render();
 	if (showInstruccions) { guiElements.render(); }
 
-	if ((my_player->model.getTranslation() - prisoner_1->model.getTranslation()).length() < 50.f && Input::isKeyPressed(SDL_SCANCODE_T)) {
-		prisoner_1->Dialogue->render();
-		std::cout << "dialogo seleccionada" << std::endl;
-	}
+	if (isTalking) { prisoner_1->Dialogue->render(); }
 
 	//Draw the floor grid
 	//drawGrid();
-	key1->collectKey(my_player);
-	key0->collectKey(my_player);
+
+
 	//render the FPS, Draw Calls, etc
 	drawText(2, 2, getGPUStats(), Vector3(1, 1, 1), 2);
 	//swap between front buffer and back buffer
@@ -182,7 +252,24 @@ void PlayStage::update(float seconds_elapsed)
 		}
 	}
 
+	if ((my_player->model.getTranslation() - prisoner_1->model.getTranslation()).length() < 50.f && Input::wasKeyPressed(SDL_SCANCODE_T)) {
+		isTalking = !isTalking;
+		std::cout << "dialogo seleccionada" << std::endl;
+	}
+	else if ((my_player->model.getTranslation() - prisoner_1->model.getTranslation()).length() > 50.f && isTalking == true) {
+		isTalking == false;
+	}
+
+	key1->collectKey(my_player);
+	key0->collectKey(my_player);
+
+	ButtonDoor0->OpenDoor(seconds_elapsed);
+	ButtonDoor1->OpenDoor(seconds_elapsed);
+	ButtonDoor2->OpenDoor(seconds_elapsed);
 	
+	ButtonDoor0->clickBotton();
+	ButtonDoor1->clickBotton();
+	ButtonDoor2->clickBotton();
 }
 
 
@@ -239,10 +326,6 @@ MenuStage::MenuStage() : Stage() {
 	floorplane = new EntityMesh(NULL, "floor", floor, texture_floor, shader_floor, Vector3());
 
 	World::get_instance()->rootMenu.addChild(floorplane);
-
-	// Audio
-	//Audio::Init();
-	//Audio::Play("data/audio/MusicaIntro.wav", 1.f, true);
 
 }
 

@@ -17,7 +17,7 @@ class PlayStage;
 class MenuStage;
 class WinStage;
 
-enum eStage { Menu, Play, Exit, Win };
+enum eStage { Menu, Play, Exit, Win, Lost };
 class Game
 {
 public:
